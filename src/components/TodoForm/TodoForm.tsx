@@ -28,9 +28,7 @@ export const TodoForm: React.FC<Props> = ({
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    const trimmedTitle = title.trim();
-
-    onAddTodo(trimmedTitle).then(success => {
+    onAddTodo(title.trim()).then(success => {
       if (success) {
         setTitle('');
       }

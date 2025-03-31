@@ -39,6 +39,7 @@ export const TodoItem: React.FC<Props> = ({ todo, onDelete, deletedTodos }) => {
       >
         ×
       </button>
+
       <div
         data-cy="TodoLoader"
         className={classNames('modal overlay', {

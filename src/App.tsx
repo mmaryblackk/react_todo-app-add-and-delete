@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { addTodo, deleteTodo, getTodos, USER_ID } from './api/todos';
 import { TodoForm } from './components/TodoForm/TodoForm';
 import { TodoList } from './components/TodoList/TodoList';
@@ -15,6 +21,8 @@ import { filterTodos } from './utils/filter';
 import { TempTodoItem } from './components/TempTodoItem/TempTodoItem';
 
 export const App: React.FC = () => {
+  // #region states
+
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<ErrorType>(
@@ -23,15 +31,16 @@ export const App: React.FC = () => {
   const [filterField, setFilterField] = useState(FilterOption.all);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [deletedTodos, setDeletedTodos] = useState<number[]>([]);
-
   const inputField = useRef<HTMLInputElement>(null);
+
+  // #endregion
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const todos = await getTodos();
+      const fetchedTodos = await getTodos();
 
-      setTodos(todos);
+      setTodos(fetchedTodos);
     } catch (error) {
       setErrorMessage(ErrorType.loading);
     } finally {
@@ -59,20 +68,20 @@ export const App: React.FC = () => {
     };
   }, [errorMessage]);
 
-  const filteredTodos = filterTodos(todos, filterField);
-
-  const handleFilterBy = (filter: FilterOption) => {
-    setFilterField(filter);
-  };
-
-  const clearErrorMessage = () => {
+  const clearErrorMessage = useCallback(() => {
     setErrorMessage(ErrorType.noError);
-  };
+  }, []);
 
-  const handleAddTodo = async (title: string): Promise<boolean> => {
-    const trimmedTitle = title.trim();
+  const filteredTodos = useMemo(() => {
+    return filterTodos(todos, filterField);
+  }, [todos, filterField]);
 
-    if (!trimmedTitle) {
+  const handleFilterBy = useCallback((filter: FilterOption) => {
+    setFilterField(filter);
+  }, []);
+
+  const handleAddTodo = async (title: string) => {
+    if (!title.trim()) {
       setErrorMessage(ErrorType.emptyTitle);
 
       return false;
@@ -80,16 +89,16 @@ export const App: React.FC = () => {
 
     const newTodo: Omit<Todo, 'id'> = {
       userId: USER_ID,
-      title: trimmedTitle,
+      title: title.trim(),
       completed: false,
     };
 
-    const tempTodoData: Todo = {
+    const newTempTodo: Todo = {
       ...newTodo,
       id: 0,
     };
 
-    setTempTodo(tempTodoData);
+    setTempTodo(newTempTodo);
 
     try {
       const addedTodo = await addTodo(newTodo);
@@ -111,10 +120,8 @@ export const App: React.FC = () => {
 
     try {
       await deleteTodo(todoId);
-      setTodos(prev => prev.filter(todo => todo.id !== todoId));
-      setTimeout(() => {
-        inputField.current?.focus();
-      }, 0);
+      setTodos(currentTodos => currentTodos.filter(todo => todo.id !== todoId));
+      inputField.current?.focus();
     } catch {
       setErrorMessage(ErrorType.deleting);
     } finally {
@@ -147,7 +154,6 @@ export const App: React.FC = () => {
               todos={filteredTodos}
               onDelete={handleDeleteTodo}
               deletedTodos={deletedTodos}
-              isLoading={tempTodo !== null}
             />
             {tempTodo && <TempTodoItem todo={tempTodo} isLoading />}
           </section>
@@ -156,7 +162,7 @@ export const App: React.FC = () => {
               todos={todos}
               filterField={filterField}
               onFilter={handleFilterBy}
-              onClear={handleClearCompletedTodos}
+              onClearCompleted={handleClearCompletedTodos}
             />
           )}
         </div>

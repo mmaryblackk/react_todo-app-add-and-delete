@@ -8,23 +8,25 @@ type Props = {
   isLoading?: boolean;
 };
 
-export const TempTodoItem: React.FC<Props> = ({ todo, isLoading = true }) => {
+export const TempTodoItem: React.FC<Props> = ({ todo, isLoading }) => {
+  const { completed, title } = todo;
+
   return (
     <div
       data-cy="Todo"
-      className={classNames('todo', { completed: todo.completed })}
+      className={classNames('todo', { completed: completed })}
     >
       <label className="todo__status-label">
         <input
           data-cy="TodoStatus"
           type="checkbox"
           className="todo__status"
-          checked={todo.completed}
+          checked={completed}
         />
       </label>
 
       <span data-cy="TodoTitle" className="todo__title">
-        {todo.title}
+        {title}
       </span>
 
       <button type="button" className="todo__remove" data-cy="TodoDelete">

@@ -6,10 +6,7 @@ type Props = {
   clearErrorMessage: () => void;
 };
 
-export const Error: React.FC<Props> = ({
-  errorMessage,
-  clearErrorMessage: handleHideError,
-}) => {
+export const Error: React.FC<Props> = ({ errorMessage, clearErrorMessage }) => {
   return (
     <div
       data-cy="ErrorNotification"
@@ -25,7 +22,7 @@ export const Error: React.FC<Props> = ({
         data-cy="HideErrorButton"
         type="button"
         className="delete"
-        onClick={handleHideError}
+        onClick={clearErrorMessage}
       />
       {errorMessage}
     </div>

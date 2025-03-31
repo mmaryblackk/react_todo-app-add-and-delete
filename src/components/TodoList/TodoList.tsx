@@ -6,7 +6,6 @@ type Props = {
   todos: Todo[];
   onDelete: (id: number) => void;
   deletedTodos: number[];
-  isLoading: boolean;
 };
 
 export const TodoList: React.FC<Props> = ({
